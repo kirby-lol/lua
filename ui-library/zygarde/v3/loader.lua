@@ -3,15 +3,6 @@
     local RunService = game:GetService("RunService")
     local player = game.Players.LocalPlayer
 
-
-local function pixelsToScale(pxX, pxY)
-    local screenSize = workspace.CurrentCamera.ViewportSize
-    local scaleX = math.max(pxX / screenSize.X, 0.02) -- don't go below 2%
-    local scaleY = math.max(pxY / screenSize.Y, 0.02)
-    return UDim2.new(scaleX, 0, scaleY, 0)
-end
-
-
 local SearcherUILibrary = {}
 
 
