@@ -86,13 +86,16 @@ end
 -- Function to simulate clicking attack
 local function clickCenter()
     if UserInputService.TouchEnabled then
-        local attackButton = Player:WaitForChild("PlayerGui"):FindFirstChild("Mobile")
-        if attackButton and attackButton:FindFirstChild("Attack") then
-            local attackUI = attackButton.Attack
+        -- MOBILE DETECTED
+        local playerGui = Player:WaitForChild("PlayerGui")
+        local mobileGui = playerGui:WaitForChild("Mobile") -- Wait for "Mobile"
 
-            if attackUI:IsA("ImageButton") or attackUI:IsA("TextButton") then
-                tapOnUI(attackUI)
-            end
+        local attackButton = mobileGui:WaitForChild("Attack") -- Wait for "Attack"
+
+        if attackButton:IsA("ImageButton") or attackButton:IsA("TextButton") then
+            task.spawn(function()
+                attackButton:Activate() -- Simulates a click
+            end)
         end
     else
         -- PC fallback (center screen click)
