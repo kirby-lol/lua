@@ -1,4 +1,4 @@
- local Library = loadstring(game:HttpGet("https://github.com/kirby-lol/lua/raw/refs/heads/main/ui-library/kirby/main.lua"))()
+local Library = loadstring(game:HttpGet("https://github.com/kirby-lol/lua/raw/refs/heads/main/ui-library/kirby/main.lua"))()
 
 local Window = Library:CreateWindow({
     Title = "Kirby.lol",
@@ -66,52 +66,41 @@ Library:AddToggle(Tabs.Main, {
     end
 })
 
-local function tapOnUI(guiObject)
-    if not guiObject or not guiObject:IsA("GuiObject") then return end
-
-    local absPos = guiObject.AbsolutePosition
-    local absSize = guiObject.AbsoluteSize
-    local centerX = absPos.X + absSize.X / 2
-    local centerY = absPos.Y + absSize.Y / 2
-
-    VirtualInputManager:SendTouchEvent(Enum.UserInputType.Touch, 0, {
-        [1] = Vector2.new(centerX, centerY)
-    }, true, game)
-    task.wait(0.05)
-    VirtualInputManager:SendTouchEvent(Enum.UserInputType.Touch, 0, {
-        [1] = Vector2.new(centerX, centerY)
-    }, false, game)
-end
-
--- Function to simulate clicking attack
 local function clickCenter()
-    if UserInputService.TouchEnabled then
-        -- MOBILE DETECTED
-        local playerGui = Player:WaitForChild("PlayerGui")
-        local mobileGui = playerGui:WaitForChild("Mobile") -- Wait for "Mobile"
+    local viewport = workspace.CurrentCamera.ViewportSize
+    local x = viewport.X / 2
+    local y = viewport.Y / 2
 
-        local attackButton = mobileGui:WaitForChild("Attack") -- Wait for "Attack"
-
-        if attackButton:IsA("ImageButton") or attackButton:IsA("TextButton") then
-            task.spawn(function()
-                attackButton:Activate() -- Simulates a click
-            end)
-        end
-    else
-        -- PC fallback (center screen click)
-        local viewport = workspace.CurrentCamera.ViewportSize
-        local x = viewport.X / 2
-        local y = viewport.Y / 2
-
-        spawn(function()
+    spawn(function()
+        if UserInputService.TouchEnabled then
+            VirtualInputManager:SendTouchEvent(x, y, 0, true, game)
+            task.wait(0.05)
+            VirtualInputManager:SendTouchEvent(x, y, 0, false, game)
+        else
             VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 0)
             task.wait(0.05)
             VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 0)
+        end
+    end)
+end
+
+local function clickMobileAttack()
+    local playerGui = Player:WaitForChild("PlayerGui")
+    local mobileGui = playerGui:WaitForChild("Mobile")
+    local attackButton = mobileGui:WaitForChild("Attack")
+
+    if attackButton:IsA("ImageButton") or attackButton:IsA("TextButton") then
+        task.spawn(function()
+            attackButton:Activate()
         end)
+        return true -- Indicate that the click was attempted
+    else
+        warn("Attack button not found or is the wrong type.")
+        return false
     end
 end
 
--- Simulate key presses
+
 local function pressKey(key)
     VirtualInputManager:SendKeyEvent(true, key, false, game)
     VirtualInputManager:SendKeyEvent(false, key, false, game)
@@ -130,6 +119,10 @@ RunService.RenderStepped:Connect(function(dt)
     if autoFarmEnabled then
         if not currentMob or not currentMob:IsDescendantOf(mobFolder) then
             currentMob = getRandomMob()
+        end
+    
+    if autoFarmEnabled and autoAttackEnabled then
+        clickMobileAttack()
         end
 
         if currentMob and currentMob:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
