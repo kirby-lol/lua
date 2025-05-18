@@ -54,7 +54,7 @@ Library:AddToggle(Tabs.Main, {
 
 Library:AddToggle(Tabs.Main, {
     Title = "Auto Skills",
-    Callback = function(state) {
+    Callback = function(state) 
         autoSkillsEnabled = state
         skillTimer = 0
         skillStep = 1
