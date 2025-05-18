@@ -1,20 +1,12 @@
-local function pixelsToScale(pxX, pxY)
-    local screenSize = workspace.CurrentCamera.ViewportSize
-    local scaleX = pxX / screenSize.X
-    local scaleY = pxY / screenSize.Y
-    return UDim2.new(scaleX, 0, scaleY, 0)
-end
-
-local SearcherUILibrary = {}
-
-
-function SearcherUILibrary:CreateWindow(config)
     local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
     local UserInputService = game:GetService("UserInputService")
     local RunService = game:GetService("RunService")
     local player = game.Players.LocalPlayer
 
+local SearcherUILibrary = {}
 
+
+function SearcherUILibrary:CreateWindow(config)
 
 local dragging
 local dragInput
@@ -28,7 +20,7 @@ pingfps.AnchorPoint = Vector2.new(1, 0)
 pingfps.Position = UDim2.new(1, -10, 0, 10)
 pingfps.BackgroundTransparency = 0.1
 pingfps.BorderSizePixel = 0
-pingfps.Size = UDim2.new(0.09, 0, 0.03, 0)
+pingfps.Size = UDim2.new(0, 173, 0, 30)
 
 local pingfpsPadding = Instance.new("UIPadding", pingfps)
 pingfpsPadding.PaddingLeft = UDim.new(0, 3)
@@ -128,7 +120,7 @@ pingfps.InputBegan:Connect(onInputBegan)
 UserInputService.InputChanged:Connect(onInputChanged)
 
     local MainFrame = Instance.new("Frame")
-MainFrame.Size = pixelsToScale(600, 500)
+MainFrame.Size = UDim2.new(0, 600, 0, 500)
 MainFrame.Position = UDim2.new(0.5, -325, 0.5, -175)
 MainFrame.BackgroundColor3 = Color3.fromRGB(16, 20, 16)
 MainFrame.BorderSizePixel = 0
