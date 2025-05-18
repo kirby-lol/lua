@@ -31,7 +31,7 @@ local function updateAttackState()
     attacking = autoFarmEnabled and autoAttackEnabled
 end
 
-local function updateskillsState()
+local function updateSkillsState()
     skills = autoFarmEnabled and autoSkillsEnabled
 end
 
@@ -40,7 +40,7 @@ Library:AddToggle(Tabs.Main, {
     Callback = function(state)
         autoFarmEnabled = state
         updateAttackState()
-        updateskillsState()
+        updateSkillsState()
     end
 })
 
@@ -54,11 +54,11 @@ Library:AddToggle(Tabs.Main, {
 
 Library:AddToggle(Tabs.Main, {
     Title = "Auto Skills",
-    Callback = function(state) 
+    Callback = function(state)
         autoSkillsEnabled = state
         skillTimer = 0
         skillStep = 1
-        updateskillsState()
+        updateSkillsState()
     end
 })
 
@@ -79,9 +79,9 @@ end
 local function clickMobileAttack()
     local playerGui = Player:WaitForChild("PlayerGui")
     local mobileGui = playerGui:WaitForChild("Mobile")
-    local attackButton = mobileGui:WaitForChild("Attack")
+    local attackButton = mobileGui:FindFirstChild("Attack") -- Use FindFirstChild to avoid errors
 
-    if attackButton:IsA("ImageButton") or attackButton:IsA("TextButton") then
+    if attackButton and (attackButton:IsA("ImageButton") or attackButton:IsA("TextButton")) then
         local absolutePosition = attackButton.AbsolutePosition
         local absoluteSize = attackButton.AbsoluteSize
         local centerX = absolutePosition.X + (absoluteSize.X / 2)
@@ -105,8 +105,10 @@ local currentMob = nil
 
 local function getRandomMob()
     local mobs = mobFolder:GetChildren()
-    if #mobs == 0 then return nil end
-    return mobs[math.random(1, #mobs)]
+    if #mobs > 0 then
+        return mobs[math.random(1, #mobs)]
+    end
+    return nil
 end
 
 RunService.RenderStepped:Connect(function(dt)
@@ -115,14 +117,18 @@ RunService.RenderStepped:Connect(function(dt)
             currentMob = getRandomMob()
         end
 
-        if autoFarmEnabled and autoAttackEnabled then
-            clickMobileAttack()
-        end
-
         if currentMob and currentMob:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
             local mobHRP = currentMob.HumanoidRootPart
             local backPosition = mobHRP.CFrame * CFrame.new(0, 0, 10)
             HumanoidRootPart.CFrame = CFrame.new(backPosition.Position, mobHRP.Position)
+
+            if autoAttackEnabled then
+                clickMobileAttack()
+            end
+        else
+            -- Optionally handle the case where the mob or its HRP is not found
+            -- For example, you could set currentMob to nil to find a new one.
+            -- currentMob = nil
         end
     else
         currentMob = nil
@@ -138,15 +144,15 @@ RunService.RenderStepped:Connect(function(dt)
     if skills then
         skillTimer = skillTimer + dt
 
-        if skillStep == 1 then
+        if skillStep == 1 and skillTimer >= 0.1 then -- Add a small delay to prevent spamming
             pressKey("Z")
             skillStep = 2
             skillTimer = 0
-        elseif skillStep == 2 then
+        elseif skillStep == 2 and skillTimer >= 0.1 then
             pressKey("X")
             skillStep = 3
             skillTimer = 0
-        elseif skillStep == 3 then
+        elseif skillStep == 3 and skillTimer >= 0.1 then
             pressKey("C")
             skillStep = 1
             skillTimer = 0
