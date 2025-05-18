@@ -17,15 +17,12 @@ local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-
-
 local autoFarmEnabled = false
 local autoAttackEnabled = false
 local autoSkillsEnabled = false
 
 local attacking = false
 local skills = false
-
 
 local skillTimer = 0
 local skillStep = 1
@@ -52,7 +49,6 @@ Library:AddToggle(Tabs.Main, {
     Callback = function(state)
         autoAttackEnabled = state
         updateAttackState()
-        
     end
 })
 
@@ -66,11 +62,7 @@ Library:AddToggle(Tabs.Main, {
     end
 })
 
-local function clickCenter()
-    local viewport = workspace.CurrentCamera.ViewportSize
-    local x = viewport.X / 2
-    local y = viewport.Y / 2
-
+local function clickCenter(x, y)
     spawn(function()
         if UserInputService.TouchEnabled then
             VirtualInputManager:SendTouchEvent(x, y, 0, true, game)
@@ -90,16 +82,18 @@ local function clickMobileAttack()
     local attackButton = mobileGui:WaitForChild("Attack")
 
     if attackButton:IsA("ImageButton") or attackButton:IsA("TextButton") then
-        task.spawn(function()
-            attackButton:Activate()
-        end)
-        return true -- Indicate that the click was attempted
+        local absolutePosition = attackButton.AbsolutePosition
+        local absoluteSize = attackButton.AbsoluteSize
+        local centerX = absolutePosition.X + (absoluteSize.X / 2)
+        local centerY = absolutePosition.Y + (absoluteSize.Y / 2)
+
+        clickCenter(centerX, centerY)
+        return true
     else
         warn("Attack button not found or is the wrong type.")
         return false
     end
 end
-
 
 local function pressKey(key)
     VirtualInputManager:SendKeyEvent(true, key, false, game)
@@ -120,9 +114,9 @@ RunService.RenderStepped:Connect(function(dt)
         if not currentMob or not currentMob:IsDescendantOf(mobFolder) then
             currentMob = getRandomMob()
         end
-    
-    if autoFarmEnabled and autoAttackEnabled then
-        clickMobileAttack()
+
+        if autoFarmEnabled and autoAttackEnabled then
+            clickMobileAttack()
         end
 
         if currentMob and currentMob:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
@@ -135,7 +129,10 @@ RunService.RenderStepped:Connect(function(dt)
     end
 
     if attacking then
-        clickCenter()
+        local viewport = workspace.CurrentCamera.ViewportSize
+        local x = viewport.X / 2
+        local y = viewport.Y / 2
+        clickCenter(x, y)
     end
 
     if skills then
@@ -159,6 +156,5 @@ RunService.RenderStepped:Connect(function(dt)
         skillStep = 1
     end
 end)
-
 
 return Library
