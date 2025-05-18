@@ -114,7 +114,7 @@ pingfps.InputBegan:Connect(onInputBegan)
 UserInputService.InputChanged:Connect(onInputChanged)
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = pixelsToScale(500, 300)
+MainFrame.Size = UDim2.new(0.147, 0, 0.166, 0)
 MainFrame.Position = UDim2.new(0.5, -325, 0.5, -175)
 MainFrame.BackgroundColor3 = Color3.fromRGB(16, 20, 16)
 MainFrame.BorderSizePixel = 0
