@@ -13,7 +13,7 @@ local Tabs = {
 local UserInputService = game:GetService("UserInputService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local RunService = game:GetService("RunService")
-local Player = game.Players.LocalPlayer
+local Player = game:GetService("Players").LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
@@ -79,7 +79,7 @@ end
 local function clickMobileAttack()
     local playerGui = Player:WaitForChild("PlayerGui")
     local mobileGui = playerGui:WaitForChild("Mobile")
-    local attackButton = mobileGui:FindFirstChild("Attack") -- Use FindFirstChild to avoid errors
+    local attackButton = mobileGui:FindFirstChild("Attack")
 
     if attackButton and (attackButton:IsA("ImageButton") or attackButton:IsA("TextButton")) then
         local absolutePosition = attackButton.AbsolutePosition
@@ -87,7 +87,7 @@ local function clickMobileAttack()
         local centerX = absolutePosition.X + (absoluteSize.X / 2)
         local centerY = absolutePosition.Y + (absoluteSize.Y / 2)
 
-        clickCenter(centerX, centerY) -- Use VirtualInputManager
+        clickCenter(centerX, centerY)
         return true
     else
         warn("Attack button not found or is the wrong type.")
@@ -122,12 +122,12 @@ RunService.RenderStepped:Connect(function(dt)
             local backPosition = mobHRP.CFrame * CFrame.new(0, 0, 10)
             HumanoidRootPart.CFrame = CFrame.new(backPosition.Position, mobHRP.Position)
 
+            -- Continuously click the attack button if autoAttack is enabled
             if autoAttackEnabled then
                 clickMobileAttack()
             end
         else
             -- Optionally handle the case where the mob or its HRP is not found
-            -- For example, you could set currentMob to nil to find a new one.
             -- currentMob = nil
         end
     else
@@ -144,7 +144,7 @@ RunService.RenderStepped:Connect(function(dt)
     if skills then
         skillTimer = skillTimer + dt
 
-        if skillStep == 1 and skillTimer >= 0.1 then -- Add a small delay to prevent spamming
+        if skillStep == 1 and skillTimer >= 0.1 then
             pressKey("Z")
             skillStep = 2
             skillTimer = 0
