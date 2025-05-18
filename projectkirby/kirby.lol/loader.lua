@@ -54,7 +54,7 @@ Library:AddToggle(Tabs.Main, {
 
 Library:AddToggle(Tabs.Main, {
     Title = "Auto Skills",
-    Callback = function(state)
+    Callback = function(state) {
         autoSkillsEnabled = state
         skillTimer = 0
         skillStep = 1
@@ -87,7 +87,7 @@ local function clickMobileAttack()
         local centerX = absolutePosition.X + (absoluteSize.X / 2)
         local centerY = absolutePosition.Y + (absoluteSize.Y / 2)
 
-        clickCenter(centerX, centerY)
+        clickCenter(centerX, centerY) -- Use VirtualInputManager
         return true
     else
         warn("Attack button not found or is the wrong type.")
