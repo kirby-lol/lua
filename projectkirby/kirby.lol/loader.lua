@@ -13,29 +13,38 @@ local Tabs = {
 local UserInputService = game:GetService("UserInputService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local RunService = game:GetService("RunService")
-local Player = game:GetService("Players").LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
 
+-- Wait for character to load
+local function getHumanoidRootPart()
+    local character = Player.Character or Player.CharacterAdded:Wait()
+    return character:WaitForChild("HumanoidRootPart")
+end
+
+local HumanoidRootPart = getHumanoidRootPart()
+
+-- Flags
 local autoFarmEnabled = false
 local autoAttackEnabled = false
 local autoSkillsEnabled = false
-
 local attacking = false
 local skills = false
 
+-- Skill timing
 local skillTimer = 0
 local skillStep = 1
 
+-- Update logic
 local function updateAttackState()
     attacking = autoFarmEnabled and autoAttackEnabled
-    -- attackingmobile = autoFarmEnabled and autoAttackEnabled -- Removed the duplicate assignment
 end
 
 local function updateSkillsState()
     skills = autoFarmEnabled and autoSkillsEnabled
 end
 
+-- UI Toggles
 Library:AddToggle(Tabs.Main, {
     Title = "Auto Farm",
     Callback = function(state)
@@ -63,8 +72,9 @@ Library:AddToggle(Tabs.Main, {
     end
 })
 
+-- Input functions
 local function clickCenter(x, y)
-    spawn(function()
+    task.spawn(function()
         if UserInputService.TouchEnabled then
             VirtualInputManager:SendTouchEvent(x, y, 0, true, game)
             task.wait(0.05)
@@ -78,27 +88,16 @@ local function clickCenter(x, y)
 end
 
 local function clickMobileAttack()
-    local playerGui = Player:WaitForChild("PlayerGui")
-    local mobileGui = playerGui:FindFirstChild("Mobile")
+    local playerGui = Player:FindFirstChild("PlayerGui")
+    local mobileGui = playerGui and playerGui:FindFirstChild("Mobile")
 
-    if not mobileGui then
-        warn("Mobile GUI not found.")
-        return false
-    end
+    if not mobileGui then return false end
 
     local attackButton = mobileGui:FindFirstChild("Attack")
+    if not (attackButton and (attackButton:IsA("ImageButton") or attackButton:IsA("TextButton"))) then return false end
+    if not attackButton.Visible then return false end
 
-    if not attackButton or not (attackButton:IsA("ImageButton") or attackButton:IsA("TextButton")) then
-        warn("Attack button not found or not a valid type.")
-        return false
-    end
-
-    if not attackButton.Visible then
-        warn("Attack button is not visible.")
-        return false
-    end
-
-    -- Make sure the UI is rendered.  Increased wait.
+    -- Ensure UI is rendered
     task.wait(0.15)
 
     local absPos = attackButton.AbsolutePosition
@@ -106,22 +105,19 @@ local function clickMobileAttack()
     local centerX = absPos.X + absSize.X / 2
     local centerY = absPos.Y + absSize.Y / 2
 
-    -- Force MouseButton1 click
     VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, true, game, 0)
     task.wait(0.05)
     VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, false, game, 0)
 
-    -- print("Clicked Attack at:", centerX, centerY) --Removed print, was spamming output
     return true
 end
-
-
 
 local function pressKey(key)
     VirtualInputManager:SendKeyEvent(true, key, false, game)
     VirtualInputManager:SendKeyEvent(false, key, false, game)
 end
 
+-- AutoFarm logic
 local mobFolder = workspace:WaitForChild("Enemy"):WaitForChild("Mob")
 local currentMob = nil
 
@@ -132,6 +128,9 @@ local function getRandomMob()
     end
     return nil
 end
+-- Detect device type once
+local isMobile = UserInputService.TouchEnabled
+print("Device Detected:", isMobile and "Mobile" or "PC")
 
 RunService.RenderStepped:Connect(function(dt)
     if autoFarmEnabled then
@@ -144,23 +143,31 @@ RunService.RenderStepped:Connect(function(dt)
             local backPosition = mobHRP.CFrame * CFrame.new(0, 0, 10)
             HumanoidRootPart.CFrame = CFrame.new(backPosition.Position, mobHRP.Position)
 
-            -- Continuously click the attack button if autoAttack is enabled
+            -- Perform attack based on device
             if autoAttackEnabled then
-                clickMobileAttack()
+                if isMobile then
+                    clickMobileAttack()
+                else
+                    local viewport = workspace.CurrentCamera.ViewportSize
+                    local x = viewport.X / 2
+                    local y = viewport.Y / 2
+                    clickCenter(x, y)
+                end
             end
-        else
-            -- Optionally handle the case where the mob or its HRP is not found
-            -- currentMob = nil
         end
     else
         currentMob = nil
     end
 
     if attacking then
-        local viewport = workspace.CurrentCamera.ViewportSize
-        local x = viewport.X / 2
-        local y = viewport.Y / 2
-        clickCenter(x, y)
+        if isMobile then
+            clickMobileAttack()
+        else
+            local viewport = workspace.CurrentCamera.ViewportSize
+            local x = viewport.X / 2
+            local y = viewport.Y / 2
+            clickCenter(x, y)
+        end
     end
 
     if skills then
@@ -184,5 +191,6 @@ RunService.RenderStepped:Connect(function(dt)
         skillStep = 1
     end
 end)
+
 
 return Library
