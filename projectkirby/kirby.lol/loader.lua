@@ -29,6 +29,7 @@ local skillStep = 1
 
 local function updateAttackState()
     attacking = autoFarmEnabled and autoAttackEnabled
+    -- attackingmobile = autoFarmEnabled and autoAttackEnabled -- Removed the duplicate assignment
 end
 
 local function updateSkillsState()
@@ -97,8 +98,8 @@ local function clickMobileAttack()
         return false
     end
 
-    -- Make sure the UI is rendered
-    task.wait(0.1)
+    -- Make sure the UI is rendered.  Increased wait.
+    task.wait(0.15)
 
     local absPos = attackButton.AbsolutePosition
     local absSize = attackButton.AbsoluteSize
@@ -110,7 +111,7 @@ local function clickMobileAttack()
     task.wait(0.05)
     VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, false, game, 0)
 
-    print("Clicked Attack at:", centerX, centerY)
+    -- print("Clicked Attack at:", centerX, centerY) --Removed print, was spamming output
     return true
 end
 
