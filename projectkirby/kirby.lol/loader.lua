@@ -79,24 +79,41 @@ end
 local function clickMobileAttack()
     local playerGui = Player:WaitForChild("PlayerGui")
     local mobileGui = playerGui:FindFirstChild("Mobile")
-    local attackButton = mobileGui and mobileGui:FindFirstChild("Attack")
 
-    if attackButton and (attackButton:IsA("ImageButton") or attackButton:IsA("TextButton")) then
-        local absPos = attackButton.AbsolutePosition
-        local absSize = attackButton.AbsoluteSize
-        local centerX = absPos.X + absSize.X / 2
-        local centerY = absPos.Y + absSize.Y / 2
-
-        -- Simulate MouseButton1 click at button center
-        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, true, game, 0)
-        task.wait(0.05)
-        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, false, game, 0)
-        return true
-    else
-        warn("Attack button not found or not clickable.")
+    if not mobileGui then
+        warn("Mobile GUI not found.")
         return false
     end
+
+    local attackButton = mobileGui:FindFirstChild("Attack")
+
+    if not attackButton or not (attackButton:IsA("ImageButton") or attackButton:IsA("TextButton")) then
+        warn("Attack button not found or not a valid type.")
+        return false
+    end
+
+    if not attackButton.Visible then
+        warn("Attack button is not visible.")
+        return false
+    end
+
+    -- Make sure the UI is rendered
+    task.wait(0.1)
+
+    local absPos = attackButton.AbsolutePosition
+    local absSize = attackButton.AbsoluteSize
+    local centerX = absPos.X + absSize.X / 2
+    local centerY = absPos.Y + absSize.Y / 2
+
+    -- Force MouseButton1 click
+    VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, true, game, 0)
+    task.wait(0.05)
+    VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, false, game, 0)
+
+    print("Clicked Attack at:", centerX, centerY)
+    return true
 end
+
 
 
 local function pressKey(key)
