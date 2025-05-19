@@ -78,22 +78,26 @@ end
 
 local function clickMobileAttack()
     local playerGui = Player:WaitForChild("PlayerGui")
-    local mobileGui = playerGui:WaitForChild("Mobile")
-    local attackButton = mobileGui:FindFirstChild("Attack")
+    local mobileGui = playerGui:FindFirstChild("Mobile")
+    local attackButton = mobileGui and mobileGui:FindFirstChild("Attack")
 
     if attackButton and (attackButton:IsA("ImageButton") or attackButton:IsA("TextButton")) then
-        local absolutePosition = attackButton.AbsolutePosition
-        local absoluteSize = attackButton.AbsoluteSize
-        local centerX = absolutePosition.X + (absoluteSize.X / 2)
-        local centerY = absolutePosition.Y + (absoluteSize.Y / 2)
+        local absPos = attackButton.AbsolutePosition
+        local absSize = attackButton.AbsoluteSize
+        local centerX = absPos.X + absSize.X / 2
+        local centerY = absPos.Y + absSize.Y / 2
 
-        clickCenter(centerX, centerY)
+        -- Simulate MouseButton1 click at button center
+        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, true, game, 0)
+        task.wait(0.05)
+        VirtualInputManager:SendMouseButtonEvent(centerX, centerY, 0, false, game, 0)
         return true
     else
-        warn("Attack button not found or is the wrong type.")
+        warn("Attack button not found or not clickable.")
         return false
     end
 end
+
 
 local function pressKey(key)
     VirtualInputManager:SendKeyEvent(true, key, false, game)
